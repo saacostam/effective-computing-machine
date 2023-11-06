@@ -99,8 +99,6 @@ io.on('connect', (socket) => {
     socket.on('leave-game', () => {
         const currentGame = getCurrentGame();
         if (currentGame) handleOnGameDisconnection(currentGame);
-
-        io.emit('updated-games', onlineGames);
     });
 
     socket.on('disconnect', () => {
@@ -118,8 +116,6 @@ io.on('connect', (socket) => {
         }. Number of current connections: ${
             onlineSocketIDs.length
         }`);
-
-        io.emit('updated-games', onlineGames);
     })
 });
 
