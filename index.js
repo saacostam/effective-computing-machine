@@ -9,7 +9,9 @@ let onlineGames = [];
 
 const PORT = +process.env.PORT || 3000;
 
-const io = new Server({});
+const io = new Server({
+    cors: process.env.CORS_ORIGIN,
+});
 
 io.on('connect', (socket) => {
     const getCurrentGame = () => {
@@ -32,7 +34,7 @@ io.on('connect', (socket) => {
         const socketIDsToDisconnect = currentGame.disconnect();
         socketIDsToDisconnect.forEach(
             (IO_ID) => {
-                socket.to(IO_ID).emit('leave-game');
+                io.to(IO_ID).emit('left-game');
 
                 console.log(`[LEAVE-GAME] ${
                     IO_ID
@@ -54,6 +56,12 @@ io.on('connect', (socket) => {
     io.to(socket.id).emit('updated-games', onlineGames);
 
     socket.on('create-game', () => {
+        const currentGame = getCurrentGame();
+        if (currentGame) {
+            io.to(socket.id).emit('denied-create');
+            return;
+        }
+
         const newGame = new Game(socket.id);
         onlineGames.push(newGame);
         console.log(`[CREATE-GAME] New game was created by ${
@@ -61,6 +69,7 @@ io.on('connect', (socket) => {
         }. Number of current games: ${
             onlineGames.length
         }`);
+        io.to(socket.id).emit('create-success');
         io.emit('updated-games', onlineGames);
     });
 
@@ -82,14 +91,17 @@ io.on('connect', (socket) => {
         if (gameToJoin){
             const socketIDsToStart = gameToJoin.startGame(socket.id);
             socketIDsToStart.forEach(
-                IO_ID => io.to(IO_ID).emit('start-game')
+                IO_ID => {
+                    io.to(IO_ID).emit('start-game');
+                    io.to(IO_ID).emit('update-game-state', gameToJoin);
+                }
             )
 
             console.log(`[JOIN-GAME] ${socket.id} Success! Alerting ${
                 socketIDsToStart.join(' ')
             }`);
         }else{
-            socket.to(socket.id).emit('denied-game');
+            io.to(socket.id).emit('denied-game');
             console.log(`[JOIN-GAME] ${socket.id} Denied!`);
         }
 
@@ -100,6 +112,30 @@ io.on('connect', (socket) => {
         const currentGame = getCurrentGame();
         if (currentGame) handleOnGameDisconnection(currentGame);
     });
+
+    socket.on('play', (updatedMinMatrix) => {
+        const currentGame = getCurrentGame();
+
+        if (!currentGame || !currentGame.playersSocketIDs.some(ID => ID === socket.id)){
+            io.to(socket.id).emit('leave-game');
+            return;
+        }
+
+        currentGame.grid = updatedMinMatrix;
+        currentGame.turn = currentGame.playersSocketIDs.find(ID => ID !== currentGame.turn);
+        currentGame.piece = currentGame.piece === 1 ? -1 : 1;
+        currentGame.playersSocketIDs.forEach(
+            ID => {
+                io.to(ID).emit('update-game-state', currentGame)
+            }
+        )
+
+        console.log(`[PLAY] Play from ${
+            socket.id
+        } to ${
+            JSON.stringify(updatedMinMatrix)
+        }`)
+    })
 
     socket.on('disconnect', () => {
         const currentGame = getCurrentGame();
