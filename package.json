@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/saacostam/effective-computing-machine#readme",
   "dependencies": {
+    "dotenv": "^16.3.1",
     "nodemon": "^3.0.1",
     "socket.io": "^4.7.2"
   }

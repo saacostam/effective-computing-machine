@@ -1,5 +1,8 @@
 import {Server} from "socket.io";
 import {Game} from "./src/classes/index.js";
+import {config} from "dotenv";
+
+config();
 
 let onlineSocketIDs = [];
 let onlineGames = [];
@@ -120,9 +123,16 @@ io.on('connect', (socket) => {
     })
 });
 
+const TIMEOUT = 1000*(+process.env.TIMEOUT || 60 );
+const keepAlive = () => {
+    console.log(`[APP] ⏰  Current time: ${new Date().toString()}`);
+    setTimeout(keepAlive, TIMEOUT);
+}
+
 try{
     io.listen(PORT);
     console.log(`[APP] 🚀 Server started in port ${PORT}`);
+    keepAlive();
 }catch (e){
     console.error(`[APP] ❌ Could not start server instance in port ${PORT}`);
     console.error(e);
