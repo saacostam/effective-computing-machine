@@ -122,8 +122,8 @@ io.on('connect', (socket) => {
 
 try{
     io.listen(PORT);
-    console.log(`🚀 Server started in port ${PORT}`);
+    console.log(`[APP] 🚀 Server started in port ${PORT}`);
 }catch (e){
-    console.error(`❌ Could not start server instance in port ${PORT}`);
+    console.error(`[APP] ❌ Could not start server instance in port ${PORT}`);
     console.error(e);
 }
