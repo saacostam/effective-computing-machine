@@ -1,0 +1,25 @@
+{
+  "name": "socket.io.triqui",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saacostam/effective-computing-machine.git"
+  },
+  "author": "Santiago Acosta Meza",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/saacostam/effective-computing-machine/issues"
+  },
+  "homepage": "https://github.com/saacostam/effective-computing-machine#readme",
+  "dependencies": {
+    "nodemon": "^3.0.1",
+    "socket.io": "^4.7.2"
+  }
+}
